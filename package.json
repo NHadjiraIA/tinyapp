@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/NHadjiraIA/tinyapp/issues"
   },
-  "homepage": "https://github.com/NHadjiraIA/tinyapp#readme"
+  "homepage": "https://github.com/NHadjiraIA/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
