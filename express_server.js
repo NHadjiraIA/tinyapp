@@ -35,6 +35,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase.b2xVn2 };
   console.log(rString);
   res.render("urls_show", templateVars);
+  console.log('all urls in urldatabase  displayed')
 });
 //add data to urlDatabase
 app.post('/urls', function(request, response){
