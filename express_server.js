@@ -57,6 +57,12 @@ app.get("/u/:shortURL", (req, res) => {
    
    
 });
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortUrl = req.params.shortURL;
+  delete urlDatabase[shortUrl];
+   
+});
+
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
