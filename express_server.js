@@ -33,7 +33,7 @@ app.get("/urls/new", (req, res) => {
 });
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase.b2xVn2 };
-  console.log(rString);
+   
   res.render("urls_show", templateVars);
   console.log('all urls in urldatabase  displayed')
 });
@@ -53,16 +53,21 @@ app.get("/u/:shortURL", (req, res) => {
     res.redirect(longUrl);
   } else {
     res.status(404).send("the page of this url don't exist in our database");
-  }
-   
-   
+  } 
 });
+//route that delete a URL
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortUrl = req.params.shortURL;
   delete urlDatabase[shortUrl];
    
 });
-
+//route that updates a URL
+app.post("/urls/:id", (req, res) => {
+  const shortUrl = req.params.id;
+  urlDatabase[shortUrl]= req.body.longURL;
+  res.redirect("/urls");
+   
+});
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
