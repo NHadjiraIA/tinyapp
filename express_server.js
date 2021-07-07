@@ -7,9 +7,21 @@ const cookieParser = require("cookie-parser");
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs")
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
 };
+
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -47,14 +59,19 @@ app.get("/urls", (req, res) => {
 });
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies.user_id;
-  const user = users[userId];
-  const templateVars = { urls: urlDatabase, user: user }; 
-  res.render("urls_new",templateVars);
+  if (userId) {
+    const user = users[userId];
+    const templateVars = { urls: urlDatabase, user: user }; 
+    res.render("urls_new",templateVars);
+  } else {
+    res.redirect("/login");
+  }
+ 
 });
 app.get("/urls/:shortURL", (req, res) => {
   const userId = req.cookies.user_id;
   const user = users[userId];
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase.b2xVn2,user: user };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,user: user };
    
   res.render("urls_show", templateVars);
   console.log('all urls in urldatabase  displayed')
@@ -62,8 +79,10 @@ app.get("/urls/:shortURL", (req, res) => {
 //add data to urlDatabase
 app.post('/urls', function(request, response){
   const longUrl = request.body.longURL;
+  const userId = req.cookies.user_id;
   const shortUrl = randomString(6, '0123456789abcdefjASDFG');
-  urlDatabase[shortUrl] = longUrl;
+  urlDatabase[shortUrl] = {longURL: longUrl, userID:userId };
+
   console.log(urlDatabase);
   response.send('new short url created');
 });
@@ -73,7 +92,7 @@ app.get("/u/:shortURL", (req, res) => {
   const templateVars = { urls: urlDatabase, user: user }; 
   const shortUrl = urlDatabase[req.params.shortURL]
   if(shortUrl){
-    const longUrl = urlDatabase[req.params.shortURL]
+    const longUrl = urlDatabase[req.params.shortURL].longURL
     res.redirect(longUrl);
   } else {
     res.status(404).send("the page of this url don't exist in our database");
@@ -88,7 +107,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //route that updates a URL
 app.post("/urls/:id", (req, res) => {
   const shortUrl = req.params.id;
-  urlDatabase[shortUrl]= req.body.longURL;
+  const userId = req.cookies.user_id;
+  urlDatabase[shortUrl]= {longURL: req.body.longURL, userID:userId }
   res.redirect("/urls");
    
 });
