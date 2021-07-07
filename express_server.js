@@ -105,6 +105,8 @@ app.post("/urls", (req, res) => {
 });
 // route login
 app.post("/login", (req, res) => {
+  // const userId = req.cookies.user_id;
+  // const user = users[userId];
   const email = req.body.email;
   const password = req.body.password;
   const user = CheckIfEmailAndPasswordExist(users,email,password);
@@ -114,7 +116,7 @@ app.post("/login", (req, res) => {
   } else if (!user) {
     res.send("the user doesn't exist");
   } else {
-    res.cookie('user_id',user.id);
+    res.cookie('user_id',user.id); 
     res.redirect("urls");
   }
        
@@ -132,8 +134,6 @@ app.post("/logout", (req, res) => {
 app.get("/register", (req, res) => {
  const userId = req.cookies.user_id;
   const user = users[userId];
-  
-  console.log(CheckIfEmailExist(users,"1@1.com"));
   const templateVars = { user: user };
   res.render("add_user",templateVars);
 
