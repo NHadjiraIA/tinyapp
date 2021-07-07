@@ -1,6 +1,6 @@
 
 const express = require("express");
-const {CheckIfEmailExist, CheckIfEmailAndPasswordExist }= require("./helper.js");
+const {CheckIfEmailExist, CheckIfEmailAndPasswordExist, urlsForUser }= require("./helper.js");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -23,8 +23,8 @@ const urlDatabase = {
 // };
 
 const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
+  "aJ48lW": {
+    id: "aJ48lW", 
     email: "1@1.com", 
     password: "1"
   },
@@ -52,10 +52,14 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userId = req.cookies.user_id;
-  const user = users[userId];
-  const templateVars = { urls: urlDatabase, user: user }; 
-  //pass data to the template
-  res.render("urls_index", templateVars);
+  if (userId) {
+    const user = users[userId];
+    const templateVars = { urls: urlDatabase, user: user }; 
+    res.render("urls_index",templateVars);
+  } else {
+    res.redirect("/login");
+  }
+   
 });
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies.user_id;
@@ -70,21 +74,28 @@ app.get("/urls/new", (req, res) => {
 });
 app.get("/urls/:shortURL", (req, res) => {
   const userId = req.cookies.user_id;
+  if (userId) {
   const user = users[userId];
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,user: user };
+  let templateVars = urlsForUser(urlDatabase, userId,req.params.shortURL);
+  templateVars.user = user;
+  console.log('this is the templateVars',templateVars);
+  //const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,user: user };
    
   res.render("urls_show", templateVars);
   console.log('all urls in urldatabase  displayed')
+  } else {
+    res.redirect("/login");
+  }
 });
 //add data to urlDatabase
 app.post('/urls', function(request, response){
   const longUrl = request.body.longURL;
-  const userId = req.cookies.user_id;
+  const userId = request.cookies.user_id;
   const shortUrl = randomString(6, '0123456789abcdefjASDFG');
   urlDatabase[shortUrl] = {longURL: longUrl, userID:userId };
-
-  console.log(urlDatabase);
-  response.send('new short url created');
+  response.redirect("/urls");
+  // console.log(urlDatabase);
+  // response.send('new short url created');
 });
 app.get("/u/:shortURL", (req, res) => {
   const userId = req.cookies.user_id;
@@ -100,28 +111,29 @@ app.get("/u/:shortURL", (req, res) => {
 });
 //route that delete a URL
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const userId = req.cookies.user_id;
+  if (userId) {
   const shortUrl = req.params.shortURL;
   delete urlDatabase[shortUrl];
-   
+  res.redirect("/urls");
+  } else {
+    res.render("error_message");
+  }
 });
 //route that updates a URL
 app.post("/urls/:id", (req, res) => {
-  const shortUrl = req.params.id;
   const userId = req.cookies.user_id;
+  if (userId) {
+  const shortUrl = req.params.id;
   urlDatabase[shortUrl]= {longURL: req.body.longURL, userID:userId }
   res.redirect("/urls");
+  } else {
+    res.render("error_message");
+  }
    
 });
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-app.post("/urls", (req, res) => {
-  const userId = req.cookies.user_id;
-  const user = users[userId];
-  const templateVars = { user: user };
-  res.render("add_user",templateVars);
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 // route login
 app.post("/login", (req, res) => {
