@@ -1,5 +1,6 @@
 
 const express = require("express");
+const {CheckIfEmailExist }= require("./helper.js");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -40,7 +41,6 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const userId = req.cookies.user_id;
   const user = users[userId];
-  console.log(user.email);
   const templateVars = { urls: urlDatabase, user: user }; 
   //pass data to the template
   res.render("urls_index", templateVars);
@@ -106,30 +106,40 @@ app.post("/urls", (req, res) => {
 // route login
 app.post("/login", (req, res) => {
   const userId = req.cookies.user_id;
-  res.cookie('userId',userId);  
+  res.cookie('user_id',userId);  
   res.redirect("/urls");       
 });
 // route logout 
 app.post("/logout", (req, res) => { 
-  res.clearCookie('userId');  ;
+  res.clearCookie('user_id');
   res.redirect("/urls" );       
 });
 // add user 
 app.get("/register", (req, res) => {
  const userId = req.cookies.user_id;
- console.log(userId);
   const user = users[userId];
+  
+  console.log(CheckIfEmailExist(users,"1@1.com"));
   const templateVars = { user: user };
   res.render("add_user",templateVars);
+
 });
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const id = randomString(6, '0123456789abcdefjASDFG');
-  users[id] = {id: id, email: email, password: password};
-  res.cookie('user_id',id);
-  res.redirect("urls")
-  console.log(users);
+  if (email === '' || password === ''){
+    res.status(400).send("the email or the password is empty");
+
+  } else if (CheckIfEmailExist(users,email)) {
+    res.send("this is already exist");
+  } else {
+    users[id] = {id: id, email: email, password: password};
+    res.cookie('user_id',id);
+    res.redirect("urls")
+    console.log(users);
+  }
+
    
 });
 app.listen(PORT, () => {
