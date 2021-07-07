@@ -7,6 +7,20 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "1@1.com", 
+    password: "1"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "2@2.com", 
+    password: "2"
+  }
+}
+
+
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -79,7 +93,14 @@ app.post("/urls", (req, res) => {
 app.get("/register", (req, res) => {
   res.render("add_user");
 });
-
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = randomString(6, '0123456789abcdefjASDFG');
+  users[id] = {id: id, email: email, password: password};
+  console.log(users);
+  res.send('new user created');
+});
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
