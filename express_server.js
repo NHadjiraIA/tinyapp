@@ -1,6 +1,8 @@
 
 const express = require("express");
 const app = express();
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs")
 const urlDatabase = {
@@ -20,10 +22,8 @@ const users = {
   }
 }
 
-
-const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-
+app.use(cookieParser());
 function randomString(length, chars) {
   var result = '';
   for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
@@ -38,15 +38,23 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+  console.log(user.email);
+  const templateVars = { urls: urlDatabase, user: user }; 
   //pass data to the template
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+  const templateVars = { urls: urlDatabase, user: user }; 
+  res.render("urls_new",templateVars);
 });
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase.b2xVn2 };
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase.b2xVn2,user: user };
    
   res.render("urls_show", templateVars);
   console.log('all urls in urldatabase  displayed')
@@ -60,7 +68,9 @@ app.post('/urls', function(request, response){
   response.send('new short url created');
 });
 app.get("/u/:shortURL", (req, res) => {
-  console.log(urlDatabase)
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+  const templateVars = { urls: urlDatabase, user: user }; 
   const shortUrl = urlDatabase[req.params.shortURL]
   if(shortUrl){
     const longUrl = urlDatabase[req.params.shortURL]
@@ -86,20 +96,41 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 app.post("/urls", (req, res) => {
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+  const templateVars = { user: user };
+  res.render("add_user",templateVars);
   console.log(req.body);  // Log the POST request body to the console
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
+// route login
+app.post("/login", (req, res) => {
+  const userId = req.cookies.user_id;
+  res.cookie('userId',userId);  
+  res.redirect("/urls");       
+});
+// route logout 
+app.post("/logout", (req, res) => { 
+  res.clearCookie('userId');  ;
+  res.redirect("/urls" );       
+});
 // add user 
 app.get("/register", (req, res) => {
-  res.render("add_user");
+ const userId = req.cookies.user_id;
+ console.log(userId);
+  const user = users[userId];
+  const templateVars = { user: user };
+  res.render("add_user",templateVars);
 });
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const id = randomString(6, '0123456789abcdefjASDFG');
   users[id] = {id: id, email: email, password: password};
+  res.cookie('user_id',id);
+  res.redirect("urls")
   console.log(users);
-  res.send('new user created');
+   
 });
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
