@@ -23,4 +23,17 @@ const CheckIfEmailExist = (users,email)=>{
   return false;
  
 }
-module.exports = {CheckIfEmailExist}
+const CheckIfEmailAndPasswordExist = (users,email,password)=>{
+  let keysOfUsers = Object.keys(users);
+  for (let i = 0; i < keysOfUsers.length; i++) { 
+    if ( users[keysOfUsers[i]].email === email && users[keysOfUsers[i]].password === password ) {
+      return users[keysOfUsers[i]];
+      return true;
+    }    
+   
+  }
+  return false;
+ 
+}
+
+module.exports = {CheckIfEmailExist, CheckIfEmailAndPasswordExist}

@@ -1,6 +1,6 @@
 
 const express = require("express");
-const {CheckIfEmailExist }= require("./helper.js");
+const {CheckIfEmailExist, CheckIfEmailAndPasswordExist }= require("./helper.js");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -105,9 +105,23 @@ app.post("/urls", (req, res) => {
 });
 // route login
 app.post("/login", (req, res) => {
-  const userId = req.cookies.user_id;
-  res.cookie('user_id',userId);  
-  res.redirect("/urls");       
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = CheckIfEmailAndPasswordExist(users,email,password);
+  if (email === '' || password === ''){
+    res.status(400).send("the email or the password is empty");
+
+  } else if (!user) {
+    res.send("the user doesn't exist");
+  } else {
+    res.cookie('user_id',user.id);
+    res.redirect("urls");
+  }
+       
+});
+//route login
+app.get("/login", (req, res) => {   
+  res.render("login_form");       
 });
 // route logout 
 app.post("/logout", (req, res) => { 
