@@ -1,5 +1,6 @@
 
 const express = require("express");
+const bcrypt = require('bcrypt');
 const {CheckIfEmailExist, CheckIfEmailAndPasswordExist, urlsForUser }= require("./helper.js");
 const app = express();
 const bodyParser = require("body-parser");
@@ -139,18 +140,23 @@ app.get("/hello", (req, res) => {
 app.post("/login", (req, res) => {
   // const userId = req.cookies.user_id;
   // const user = users[userId];
+  const password = req.body.password; // found in the req.params object
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const email = req.body.email;
-  const password = req.body.password;
+  //const password = req.body.password;
   const user = CheckIfEmailAndPasswordExist(users,email,password);
-  if (email === '' || password === ''){
-    res.status(400).send("the email or the password is empty");
-
-  } else if (!user) {
-    res.send("the user doesn't exist");
-  } else {
-    res.cookie('user_id',user.id); 
-    res.redirect("urls");
+  if ( bcrypt.compareSync(password , hashedPassword) ){
+    if (email === '' || password === ''){
+      res.status(400).send("the email or the password is empty");
+  
+    } else if (!user) {
+      res.send("the user doesn't exist");
+    } else {
+      res.cookie('user_id',user.id); 
+      res.redirect("urls");
+    }
   }
+
        
 });
 //route login
@@ -171,20 +177,27 @@ app.get("/register", (req, res) => {
 
 });
 app.post("/register", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const id = randomString(6, '0123456789abcdefjASDFG');
-  if (email === '' || password === ''){
-    res.status(400).send("the email or the password is empty");
+ 
+  const password = req.params.password; // found in the req.params object
 
-  } else if (CheckIfEmailExist(users,email)) {
-    res.send("this is already exist");
-  } else {
-    users[id] = {id: id, email: email, password: password};
-    res.cookie('user_id',id);
-    res.redirect("urls")
-    console.log(users);
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  const email = req.body.email;
+  //const password = req.body.password;
+  const id = randomString(6, '0123456789abcdefjASDFG');
+  if (bcrypt.hashSync(password) === hashedPassword) {
+    if (email === '' || password === ''){
+      res.status(400).send("the email or the password is empty");
+  
+    } else if (CheckIfEmailExist(users,email)) {
+      res.send("this is already exist");
+    } else {
+      users[id] = {id: id, email: email, password: password};
+      res.cookie('user_id',id);
+      res.redirect("urls")
+      console.log(users);
+    }
   }
+ 
 
    
 });
