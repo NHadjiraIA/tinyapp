@@ -29,27 +29,31 @@ const users = {
     password: "2"
   }
 }
-//
+//create  an Express JavaScript application 
 const app = express();
+//Using template engines with Express
 app.set("view engine", "ejs")
 app.use(bodyParser.urlencoded({extended: true}));
+//Using cookieSession 
 app.use(cookieSession({
   name: 'session',
   keys: ['7f69fa85-caec-4xcc-acd7-ehb2ccb368d6', 's13b4b3m-41c8-47d3-93f6-8836do3jd8eb']
 }))
+
 function randomString(length, chars) {
   var result = '';
   for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
   return result;
 }
-
+// inplementation of GET / 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+// GET /urls
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
+// 
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   if (userId) {
@@ -61,6 +65,7 @@ app.get("/urls", (req, res) => {
   }
    
 });
+// GET /urls/new
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   if (userId) {
@@ -70,17 +75,16 @@ app.get("/urls/new", (req, res) => {
   } else {
     res.redirect("/login");
   }
- 
 });
+// GET /urls/:id
 app.get("/urls/:shortURL", (req, res) => {
  const userId = req.session.user_id;
   if (userId) {
-  const user = users[userId];
-  let templateVars = urlsForUser(urlDatabase, userId,req.params.shortURL);
-  templateVars.user = user;
-  console.log('this is the templateVars',templateVars);
-  res.render("urls_show", templateVars);
-  console.log('all urls in urldatabase  displayed')
+    const user = users[userId];
+    let templateVars = urlsForUser(urlDatabase, userId,req.params.shortURL);
+    templateVars.user = user;
+    console.log('this is the templateVars', templateVars);
+    res.render("urls_show", templateVars);
   } else {
     res.redirect("/login");
   }
@@ -93,6 +97,7 @@ app.post('/urls', function(request, response){
   urlDatabase[shortUrl] = {longURL: longUrl, userID:userId };
   response.redirect("/urls");
 });
+//GET /u/:id
 app.get("/u/:shortURL", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
@@ -105,35 +110,34 @@ app.get("/u/:shortURL", (req, res) => {
     res.status(404).send("the page of this url don't exist in our database");
   } 
 });
-//route that delete a URL
+//POST /urls (route that delete a URL)
 app.post("/urls/:shortURL/delete", (req, res) => {;
   const userId = req.session.user_id;
   if (userId) {
-  const shortUrl = req.params.shortURL;
-  delete urlDatabase[shortUrl];
-  res.redirect("/urls");
+    const shortUrl = req.params.shortURL;
+    delete urlDatabase[shortUrl];
+    res.redirect("/urls");
   } else {
     res.render("error_message");
   }
 });
-//route that updates a URL
+// POST /urls/:id (route that updates a URL)
 app.post("/urls/:id", (req, res) => {
   const userId = req.session.user_id;
   if (userId) {
-  const shortUrl = req.params.id;
-  urlDatabase[shortUrl]= {longURL: req.body.longURL, userID:userId }
-  res.redirect("/urls");
+    const shortUrl = req.params.id;
+    urlDatabase[shortUrl]= {longURL: req.body.longURL, userID:userId }
+    res.redirect("/urls");
   } else {
     res.render("error_message");
   }
-   
 });
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
-// route login
+// POST /login  
 app.post("/login", (req, res) => {
-    const password = req.body.password; // found in the req.params object
+  const password = req.body.password; // found in the req.params object
   const hashedPassword = bcrypt.hashSync(password, 10);
   const email = req.body.email;;
   const user = CheckIfEmailAndPasswordExist(users,email,password);
@@ -148,39 +152,34 @@ app.post("/login", (req, res) => {
       console.log(user.id);
       res.redirect("urls");
     }
-  }
-
-       
+  }    
 });
-//route login
+// GET /login  
 app.get("/login", (req, res) => {   
   res.render("login_form");       
 });
-// route logout 
+// POST /logout 
 app.post("/logout", (req, res) => { 
   req.session = null;
   res.redirect("/urls" );       
 });
-// add user 
+// GET /register  
 app.get("/register", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
   const templateVars = { user: user };
   res.render("add_user",templateVars);
-
 });
-app.post("/register", (req, res) => {
- 
+//POST /register
+app.post("/register", (req, res) => { 
   const password = req.body.password;  // found in the req.params object
-
   const hashedPassword = bcrypt.hashSync(password, 10);
   const email = req.body.email;;
   const id = randomString(6, '0123456789abcdefjASDFG');
   let userExist = getUserByEmail(users,email);
   if (bcrypt.compareSync(password, hashedPassword)){
     if (email === '' || password === ''){
-      res.status(400).send("the email or the password is empty");
-  
+      res.status(400).send("the email or the password is empty");  
     } else if (userExist) {
       res.send("this is already exist");
     } else {
