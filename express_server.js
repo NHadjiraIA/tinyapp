@@ -89,9 +89,12 @@ app.get("/urls/:shortURL", (req, res) => {
  const userId = req.session.user_id;
   if (userId) {
     const user = users[userId];
-    let templateVars = urlsForUser(urlDatabase, userId,req.params.shortURL);
+    const result = urlsForUser(urlDatabase, userId,req.params.shortURL);
+    let templateVars ={
+     shortURL: result.shortURL,
+     longURL: result.longURL
+    }
     templateVars.user = user;
-    console.log('this is the templateVars', templateVars);
     res.render("urls_show", templateVars);
   } else {
     res.redirect("/login");

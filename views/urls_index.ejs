@@ -34,27 +34,11 @@
                 </form>
               </td>             
             <td>
-
               <form method="GET" action="/urls/<%= url %>">
                 <button  >   Edit</button>
               </form>
             </td>
-          </tr>         
-
-              <form method="POST" action="/urls/<%= url %>/delete">
-              <button  >   Delete</button>
-            </form>
-            
-            </td>
-            <td>
-              <a  href="/urls/<%= url %>/">
-                <button  >   Edit</button>
-              </a>
-            </td>
-            
-          </tr>
-         
-
+          </tr> 
         <% } %>
       </tbody>
     </table>

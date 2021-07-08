@@ -56,6 +56,7 @@ const urlsForUser = (urlDatabase, id,shortUrl) =>{
   for (let i = 0; i < keysOfUrlDatabase.length; i++){
    if ( urlDatabase[keysOfUrlDatabase[i]].userID === id && keysOfUrlDatabase[i] == shortUrl){
      //result.push(urlDatabase[keysOfUrlDatabase[i]])
+     console.log("this is the logurls ",{"shortURL" :keysOfUrlDatabase[i],"longURL": urlDatabase[keysOfUrlDatabase[i]].longURL} )
     return {"shortURL" :keysOfUrlDatabase[i],"longURL": urlDatabase[keysOfUrlDatabase[i]].longURL };
      
   }
