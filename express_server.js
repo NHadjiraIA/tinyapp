@@ -1,11 +1,13 @@
 
 const express = require("express");
+
 const bcrypt = require("bcrypt");
 const {getUserByEmail, CheckIfEmailAndPasswordExist, urlsForUser }= require("./helpers.js");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const PORT = 8080; // default port 8080
 // the urlDatabase
+
 const urlDatabase = {
   b6UTxQ: {
       longURL: "https://www.tsn.ca",
@@ -16,6 +18,7 @@ const urlDatabase = {
       userID: "aJ48lW"
   }
 };
+
 //the users
 const users = { 
   "aJ48lW": {
@@ -40,6 +43,7 @@ app.use(cookieSession({
   keys: ['7f69fa85-caec-4xcc-acd7-ehb2ccb368d6', 's13b4b3m-41c8-47d3-93f6-8836do3jd8eb']
 }))
 
+
 function randomString(length, chars) {
   var result = '';
   for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
@@ -55,6 +59,7 @@ app.get("/urls.json", (req, res) => {
 });
 // 
 app.get("/urls", (req, res) => {
+
   const userId = req.session.user_id;
   if (userId) {
     const user = users[userId];
@@ -67,6 +72,7 @@ app.get("/urls", (req, res) => {
 });
 // GET /urls/new
 app.get("/urls/new", (req, res) => {
+
   const userId = req.session.user_id;
   if (userId) {
     const user = users[userId];
@@ -75,9 +81,11 @@ app.get("/urls/new", (req, res) => {
   } else {
     res.redirect("/login");
   }
+
 });
 // GET /urls/:id
 app.get("/urls/:shortURL", (req, res) => {
+
  const userId = req.session.user_id;
   if (userId) {
     const user = users[userId];
@@ -88,6 +96,7 @@ app.get("/urls/:shortURL", (req, res) => {
   } else {
     res.redirect("/login");
   }
+
 });
 //add data to urlDatabase
 app.post('/urls', function(request, response){
@@ -189,6 +198,7 @@ app.post("/register", (req, res) => {
     }
   }   
 });
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
