@@ -1,7 +1,7 @@
 
 const express = require("express");
 const bcrypt = require('bcrypt');
-const {CheckIfEmailExist, CheckIfEmailAndPasswordExist, urlsForUser }= require("./helper.js");
+const {getUserByEmail, CheckIfEmailAndPasswordExist, urlsForUser }= require("./helpers.js");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -178,25 +178,26 @@ app.get("/register", (req, res) => {
 });
 app.post("/register", (req, res) => {
  
-  const password = req.params.password; // found in the req.params object
+  const password = req.body.password;  // found in the req.params object
 
   const hashedPassword = bcrypt.hashSync(password, 10);
   const email = req.body.email;
   //const password = req.body.password;
   const id = randomString(6, '0123456789abcdefjASDFG');
-  if (bcrypt.hashSync(password) === hashedPassword) {
+  let userExist = getUserByEmail(users,email);
+  if (bcrypt.compareSync(password, hashedPassword)){
     if (email === '' || password === ''){
       res.status(400).send("the email or the password is empty");
   
-    } else if (CheckIfEmailExist(users,email)) {
+    } else if (userExist) {
       res.send("this is already exist");
     } else {
       users[id] = {id: id, email: email, password: password};
       res.cookie('user_id',id);
-      res.redirect("urls")
-      console.log(users);
+      res.redirect("urls");
     }
-  }
+  } 
+   
  
 
    

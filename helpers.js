@@ -22,16 +22,19 @@ const urlDatabase = {
       userID: "aJ48lW"
   }
 };
-const CheckIfEmailExist = (users,email)=>{
+const getUserByEmail = (users,email)=>{
   let keysOfUsers = Object.keys(users);
+  let userId = '';
   for (let i = 0; i < keysOfUsers.length; i++) { 
     if ( users[keysOfUsers[i]].email === email) {
-  
-      return true;
+       userId = users[keysOfUsers[i]].id;
+       return userId;
     }    
    
   }
-  return false;
+  return undefined;
+  console.log('this is the ckeck od user id exist',userId)
+  // return false;
  
 }
 const CheckIfEmailAndPasswordExist = (users,email,password)=>{
@@ -39,7 +42,7 @@ const CheckIfEmailAndPasswordExist = (users,email,password)=>{
   for (let i = 0; i < keysOfUsers.length; i++) { 
     if ( users[keysOfUsers[i]].email === email && users[keysOfUsers[i]].password === password ) {
       return users[keysOfUsers[i]];
-      return true;
+      
     }    
    
   }
@@ -60,4 +63,4 @@ const urlsForUser = (urlDatabase, id,shortUrl) =>{
   }
   return false;
 }
-module.exports = {CheckIfEmailExist, CheckIfEmailAndPasswordExist, urlsForUser}
+module.exports = {getUserByEmail, CheckIfEmailAndPasswordExist, urlsForUser}
