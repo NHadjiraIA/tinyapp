@@ -16,7 +16,11 @@ const urlDatabase = {
   i3BoGr: {
       longURL: "https://www.google.ca",
       userID: "aJ48lW"
-  }
+  },
+  i3BGr: {
+    longURL: "https://www.youtube.com",
+    userID: "user2RandomID"
+}
 };
 
 //the users
@@ -51,12 +55,19 @@ function randomString(length, chars) {
 }
 // inplementation of GET / 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const userId = req.session.user_id;
+  if (userId) {
+    const user = users[userId];
+    const templateVars = { urls: urlDatabase, user: user }; 
+    res.render("urls_index",templateVars);
+  } else {
+    res.redirect("/login");
+  }
 });
 // GET /urls
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
 // 
 app.get("/urls", (req, res) => {
 
@@ -65,6 +76,7 @@ app.get("/urls", (req, res) => {
     const user = users[userId];
     const templateVars = { urls: urlDatabase, user: user }; 
     res.render("urls_index",templateVars);
+     
   } else {
     res.redirect("/login");
   }
@@ -144,9 +156,7 @@ app.post("/urls/:id", (req, res) => {
     res.render("error_message");
   }
 });
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+ 
 // POST /login  
 app.post("/login", (req, res) => {
   const password = req.body.password; // found in the req.params object
