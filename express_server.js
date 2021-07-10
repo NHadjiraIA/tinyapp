@@ -2,7 +2,7 @@
 const express = require("express");
 
 const bcrypt = require("bcrypt");
-const {getUserByEmail, CheckIfEmailAndPasswordExist, urlsForUser }= require("./helpers.js");
+const {getUserByEmail, urlsOfUser, CheckIfEmailAndPasswordExist, urlsForUser }= require("./helpers.js");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const PORT = 8080; // default port 8080
@@ -68,15 +68,15 @@ app.get("/", (req, res) => {
 // app.get("/urls.json", (req, res) => {
 //   res.json(urlDatabase);
 // });
-// 
-app.get("/urls", (req, res) => {
 
+app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   if (userId) {
     const user = users[userId];
-    const templateVars = { urls: urlDatabase, user: user }; 
-    res.render("urls_index",templateVars);
-     
+    const result = urlsOfUser(urlDatabase, userId);   
+    console.log(urlDatabase);
+    const templateVars = { urls: result, user: user }   
+    res.render("urls_index",templateVars);     
   } else {
     res.redirect("/login");
   }
@@ -107,7 +107,12 @@ app.get("/urls/:shortURL", (req, res) => {
      longURL: result.longURL
     }
     templateVars.user = user;
-    res.render("urls_show", templateVars);
+    if (templateVars) {
+      res.render("urls_show", templateVars);
+    } else{
+      res.status(404).send("the page of this url don't exist in our database");
+    }
+    
   } else {
     res.redirect("/login");
   }
@@ -118,8 +123,16 @@ app.post('/urls', function(request, response){
   const longUrl = request.body.longURL;;
   const userId = request.session.user_id;
   const shortUrl = randomString(6, '0123456789abcdefjASDFG');
-  urlDatabase[shortUrl] = {longURL: longUrl, userID:userId };
-  response.redirect("/urls");
+  
+  if (userId) {  
+    console.log("we are in 128"); 
+    urlDatabase[shortUrl] = {longURL: longUrl, userID:userId };
+    response.redirect("/urls");
+  } else {
+    console.log("we are in 132"); 
+    response.redirect("/login");
+  }
+  
 });
 //GET /u/:id
 app.get("/u/:shortURL", (req, res) => {
@@ -131,7 +144,12 @@ app.get("/u/:shortURL", (req, res) => {
     const longUrl = urlDatabase[req.params.shortURL].longURL
     res.redirect(longUrl);
   } else {
-    res.status(404).send("the page of this url don't exist in our database");
+    contentError = "the page of this url don't exist in our database";
+      const user = users[userId];
+      const templateVars = { user: user , errorMessage: contentError};
+      console.log(templateVars)
+      res.render("error_message",templateVars);
+    
   } 
 });
 //POST /urls (route that delete a URL)
@@ -148,37 +166,63 @@ app.post("/urls/:shortURL/delete", (req, res) => {;
 // POST /urls/:id (route that updates a URL)
 app.post("/urls/:id", (req, res) => {
   const userId = req.session.user_id;
+  
   if (userId) {
     const shortUrl = req.params.id;
     urlDatabase[shortUrl]= {longURL: req.body.longURL, userID:userId }
     res.redirect("/urls");
   } else {
-    res.render("error_message");
+    const user = users[userId];
+    const templateVars = { user: user };
+    res.render("error_message",templateVars);
+    
   }
 });
  
 // POST /login  
 app.post("/login", (req, res) => {
+  const userId = req.session.user_id;
   const password = req.body.password; // found in the req.params object
   const hashedPassword = bcrypt.hashSync(password, 10);
   const email = req.body.email;;
   const user = CheckIfEmailAndPasswordExist(users,email,password);
+  console.log(users.email)
   if ( bcrypt.compareSync(password , hashedPassword) ){
-    if (email === '' || password === ''){
-      res.status(400).send("the email or the password is empty");
+    if (email === '' || password === ''){     
+      contentError = "the user or the  password is empty ";
+      const user = users[userId];
+      const templateVars = { user: user , errorMessage: contentError};
+      console.log(templateVars)
+      res.render("error_message",templateVars);
   
     } else if (!user) {
-      res.send("the user doesn't exist");
+      
+      contentError = "the user doesn't exist ";
+      const user = users[userId];
+      const templateVars = { user: user , errorMessage: contentError};
+      console.log(templateVars)
+      res.render("error_message",templateVars);
+      
+
+    } else if (email !== user.email || password !== user.password) {
+       contentError = "the email or password is incorrect  ";
+     const user = users[userId];
+     const templateVars = { user: user , errorMessage: contentError};
+     console.log(templateVars)
+     res.render("error_message",templateVars);
+     
     } else {
       req.session.user_id = user.id;
-      console.log(user.id);
       res.redirect("urls");
     }
   }    
 });
 // GET /login  
-app.get("/login", (req, res) => {   
-  res.render("login_form");       
+app.get("/login", (req, res) => {  
+  const userId = req.session.user_id;
+  const user = users[userId];
+  const templateVars = { user: user }; 
+  res.render("login_form",templateVars);       
 });
 // POST /logout 
 app.post("/logout", (req, res) => { 
@@ -194,6 +238,7 @@ app.get("/register", (req, res) => {
 });
 //POST /register
 app.post("/register", (req, res) => { 
+  const userId = req.session.user_id;
   const password = req.body.password;  // found in the req.params object
   const hashedPassword = bcrypt.hashSync(password, 10);
   const email = req.body.email;;
@@ -201,9 +246,17 @@ app.post("/register", (req, res) => {
   let userExist = getUserByEmail(users,email);
   if (bcrypt.compareSync(password, hashedPassword)){
     if (email === '' || password === ''){
-      res.status(400).send("the email or the password is empty");  
+      contentError = "the user or the  password is empty ";
+      const user = users[userId];
+      const templateVars = { user: user , errorMessage: contentError};
+      console.log(templateVars)
+      res.render("error_message",templateVars);
     } else if (userExist) {
-      res.send("this is already exist");
+      contentError = "this user is already exist ";
+      const user = users[userId];
+      const templateVars = { user: user , errorMessage: contentError};
+      console.log(templateVars)
+      res.render("error_message",templateVars);
     } else {
       users[id] = {id: id, email: email, password: password};
       req.session.user_id = id;

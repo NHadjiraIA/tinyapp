@@ -64,4 +64,21 @@ const urlsForUser = (urlDatabase, id,shortUrl) =>{
   }
   return false;
 }
-module.exports = {getUserByEmail, CheckIfEmailAndPasswordExist, urlsForUser}
+const urlsOfUser = (urlDatabase, id) =>{
+  let keysOfUrlDatabase = Object.keys(urlDatabase);
+  let urlsOfUser = {};
+  //console.log(keysOfUrlDatabase);
+  for (let i = 0; i < keysOfUrlDatabase.length; i++){
+   if ( urlDatabase[keysOfUrlDatabase[i]].userID === id ){
+     //result.push(urlDatabase[keysOfUrlDatabase[i]])
+     //console.log("this is the logurls ",{"shortURL" :keysOfUrlDatabase[i],"longURL": urlDatabase[keysOfUrlDatabase[i]].longURL} )
+     urlsOfUser[keysOfUrlDatabase[i]] = urlDatabase[keysOfUrlDatabase[i]];
+
+  }
+  //return {"shortURL" :keysOfUrlDatabase[i],"longURL": urlDatabase[keysOfUrlDatabase[i]].longURL };
+    
+  }
+  return urlsOfUser; 
+   
+}
+module.exports = {urlsOfUser, getUserByEmail, CheckIfEmailAndPasswordExist, urlsForUser}
