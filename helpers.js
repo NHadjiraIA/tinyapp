@@ -37,48 +37,69 @@ const getUserByEmail = (users,email)=>{
   // return false;
  
 }
-const CheckIfEmailAndPasswordExist = (users,email,password)=>{
+//check if the email given existe in our database
+const CheckIfEmailExist = (users,email)=>{
   let keysOfUsers = Object.keys(users);
   for (let i = 0; i < keysOfUsers.length; i++) { 
-    if ( users[keysOfUsers[i]].email === email && users[keysOfUsers[i]].password === password ) {
-      return users[keysOfUsers[i]];
-      
-    }    
+    if ( users[keysOfUsers[i]].email === email  ) {
+      return users[keysOfUsers[i]];      
+    }     
+  }
+  return false; 
+}
+//check if the email and the password given are correct
+const CheckIfEmailAndPasswordCorrect = (users,email,password)=>{
+  let keysOfUsers = Object.keys(users);
+  let status ="incorrect";
+  for (let i = 0; i < keysOfUsers.length; i++) { 
+     if (users[keysOfUsers[i]].password === password && users[keysOfUsers[i]].email === email ) {
+      status = "password correct"
+    }
    
   }
-  return false;
+  return status;
  
 }
+//check if the urls is the the url of the user with an UserId is "id"
 const urlsForUser = (urlDatabase, id,shortUrl) =>{
   let keysOfUrlDatabase = Object.keys(urlDatabase);
-  
-  console.log(keysOfUrlDatabase);
+  let status = "not found" 
   for (let i = 0; i < keysOfUrlDatabase.length; i++){
-   if ( urlDatabase[keysOfUrlDatabase[i]].userID === id && keysOfUrlDatabase[i] == shortUrl){
-     //result.push(urlDatabase[keysOfUrlDatabase[i]])
-     console.log("this is the logurls ",{"shortURL" :keysOfUrlDatabase[i],"longURL": urlDatabase[keysOfUrlDatabase[i]].longURL} )
-    return {"shortURL" :keysOfUrlDatabase[i],"longURL": urlDatabase[keysOfUrlDatabase[i]].longURL };
-     
+   
+   if ( urlDatabase[keysOfUrlDatabase[i]].userID === id && keysOfUrlDatabase[i] === shortUrl){
+    let urlsFound = {"shortURL" :keysOfUrlDatabase[i],"longURL": urlDatabase[keysOfUrlDatabase[i]].longURL };
+    return urlsFound;     
+  } else if ( keysOfUrlDatabase[i] === shortUrl && 
+    urlDatabase[keysOfUrlDatabase[i]].userID !== id ) {
+    return "this url is not for this user";
+  } else if( keysOfUrlDatabase[i] === shortUrl) {
+    status = "found";
+  } 
+   
+  }
+  return status;
+}
+//check if the urls of the user with UserId is "id" exist
+const urlsOfUserExist = (urlDatabase, id,shortUrl) =>{
+  let keysOfUrlDatabase = Object.keys(urlDatabase);
+  for (let i = 0; i < keysOfUrlDatabase.length; i++){
+   if ( urlDatabase[keysOfUrlDatabase[i]].userID === id && keysOfUrlDatabase[i] === shortUrl){
+      return true
   }
    
   }
   return false;
 }
+// return the urls of the user with UserId is "id"
 const urlsOfUser = (urlDatabase, id) =>{
   let keysOfUrlDatabase = Object.keys(urlDatabase);
   let urlsOfUser = {};
-  //console.log(keysOfUrlDatabase);
   for (let i = 0; i < keysOfUrlDatabase.length; i++){
-   if ( urlDatabase[keysOfUrlDatabase[i]].userID === id ){
-     //result.push(urlDatabase[keysOfUrlDatabase[i]])
-     //console.log("this is the logurls ",{"shortURL" :keysOfUrlDatabase[i],"longURL": urlDatabase[keysOfUrlDatabase[i]].longURL} )
-     urlsOfUser[keysOfUrlDatabase[i]] = urlDatabase[keysOfUrlDatabase[i]];
-
-  }
-  //return {"shortURL" :keysOfUrlDatabase[i],"longURL": urlDatabase[keysOfUrlDatabase[i]].longURL };
-    
+    if ( urlDatabase[keysOfUrlDatabase[i]].userID === id ){
+      urlsOfUser[keysOfUrlDatabase[i]] = urlDatabase[keysOfUrlDatabase[i]];
+    }    
   }
   return urlsOfUser; 
    
 }
-module.exports = {urlsOfUser, getUserByEmail, CheckIfEmailAndPasswordExist, urlsForUser}
+module.exports = {urlsOfUser,urlsOfUserExist, getUserByEmail, CheckIfEmailExist, urlsForUser,CheckIfEmailAndPasswordCorrect}
